@@ -2,10 +2,11 @@
  * @Author: Ivan Chichvarin ichichvarin@humanplus.ru
  * @Date: 2024-05-10 21:51:39
  * @LastEditors: Ivan Chichvarin ichichvarin@humanplus.ru
- * @LastEditTime: 2024-05-10 22:05:23
+ * @LastEditTime: 2024-05-10 22:32:15
  * @FilePath: /VehiclePlate/vehicle_plate.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
+#include <algorithm>
 #include <array>
 #include <iomanip>
 #include <iostream>
@@ -53,6 +54,10 @@ ostream& operator<<(ostream& out, VehiclePlate plate) {
     return out;
 }
 
+bool operator==(const VehiclePlate& lhs, const VehiclePlate& rhs) {
+    return (lhs.ToString() == rhs.ToString());
+}
+
 template <typename T>
 class HashableContainer {
 public:
@@ -65,15 +70,17 @@ public:
             elements_.resize(index * 2 + 1);
         }
 
-        elements_[index] = move(elem);
+        if(std::find(elements_[index].begin(), elements_[index].end(), elem) == elements_[index].end()) {//doesn't contain
+            elements_[index].push_back(move(elem));   
+        }
+        
     }
 
     void PrintAll(ostream& out) const {
-        for (auto& e : elements_) {
-            if (!e.has_value()) {
-                continue;
+        for (auto& element : elements_) {
+            for(auto value : element){
+                out << value << endl;
             }
-            out << e.value() << endl;
         }
     }
 
@@ -82,7 +89,7 @@ public:
     }
 
 private:
-    vector<optional<T>> elements_;
+    vector<vector<T>> elements_;
 };
 
 int main() {
